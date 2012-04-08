@@ -1,0 +1,6 @@
+# Contains the secret highscore signing salt
+MathDash/Model/Keys.cs
+
+# Generated stuff
+MathDash/Bin/
+MathDash/obj/

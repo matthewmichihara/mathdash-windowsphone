@@ -1,0 +1,58 @@
+﻿<phone:PhoneApplicationPage 
+    x:Class="MathDash.View.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:c="clr-namespace:MathDash.View.Converter"
+    xmlns:s="clr-namespace:MathDash.Model"
+    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="768"
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"
+    SupportedOrientations="Portrait" Orientation="Portrait"
+    shell:SystemTray.IsVisible="True">
+
+    <Grid>
+        <Grid.Resources>
+            <c:StringFormatConverter x:Name="StringFormatConverter"/>
+            <s:ScoreStorage x:Name="scoreStorage"/>
+            
+            <Style x:Name="TitleStyle" TargetType="TextBlock">
+                <Setter Property="TextBlock.FontSize" Value="72"/>
+                <Setter Property="TextBlock.Margin" Value="0 120 0 0"/>
+                <Setter Property="TextBlock.FontFamily" Value="{StaticResource PhoneFontFamilySemiBold}"/>
+                <Setter Property="TextBlock.HorizontalAlignment" Value="Center"/>
+            </Style>
+            <Style x:Name="SymbolStyle" TargetType="TextBlock">
+                <Setter Property="TextBlock.Foreground" Value="{StaticResource PhoneAccentBrush}" />
+                <Setter Property="TextBlock.Margin" Value="0 -30 0 0"/>
+                <Setter Property="TextBlock.FontSize" Value="72"/>
+                <Setter Property="TextBlock.FontFamily" Value="{StaticResource PhoneFontFamilySemiBold}"/>
+                <Setter Property="TextBlock.HorizontalAlignment" Value="Center"/>
+            </Style>
+            <Style x:Name="HighScoreStyle" TargetType="TextBlock">
+                <Setter Property="TextBlock.HorizontalAlignment" Value="Center"/>
+                <Setter Property="TextBlock.VerticalAlignment" Value="Center"/>
+                <Setter Property="TextBlock.FontSize" Value="24"/>
+            </Style>
+        </Grid.Resources>
+        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Math Dash" Style="{StaticResource TitleStyle}" Grid.Row="0"/>
+        <TextBlock Text="+ - * /" Style="{StaticResource SymbolStyle}"  Grid.Row="1" />
+        <TextBlock x:Name="Score" Text="{Binding Source={StaticResource scoreStorage}, Path=HighScore, Converter={StaticResource StringFormatConverter}, ConverterParameter='High Score: \{0\}'}" Grid.Row="2" Style="{StaticResource HighScoreStyle}"/>
+        <Button x:Name="LeaderboardButton" Content="Leaderboard" Grid.Row="3" Click="LeaderboardButton_Click" />
+        <Button x:Name="PlayButton" Content="Play" Grid.Row="4" Click="PlayButton_Click" />
+    </Grid>
+
+</phone:PhoneApplicationPage>

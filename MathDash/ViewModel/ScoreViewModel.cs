@@ -46,16 +46,18 @@ namespace MathDash.ViewModel
         {
             get
             {
-                if (Score > 60)
+                if (Score >= 35)
                     return "GENIUS";
-                if (Score > 50)
+                if (Score >= 30)
                     return "Brilliant";
-                if (Score > 40)
+                if (Score >= 25)
                     return "Intelligent";
-                if (Score > 30)
+                if (Score >= 20)
                     return "Average";
+                if (Score >= 15)
+                    return "Bad";
 
-                return "Below Average";
+                return "Really Bad";
             }
         }
 
@@ -63,15 +65,15 @@ namespace MathDash.ViewModel
         {
             get
             {
-                if (Score > 60)
+                if (Score >= 35)
                     return "A+";
-                if (Score > 50)
+                if (Score >= 30)
                     return "A";
-                if (Score > 40)
+                if (Score >= 25)
                     return "B";
-                if (Score > 30)
+                if (Score >= 20)
                     return "C";
-                if (Score > 20)
+                if (Score >= 15)
                     return "D";
 
                 return "F";

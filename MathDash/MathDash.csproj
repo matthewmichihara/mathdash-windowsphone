@@ -70,6 +70,7 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Model\HighScore.cs" />
+    <Compile Include="Model\Keys.cs" />
     <Compile Include="Model\Util.cs" />
     <Compile Include="ViewModel\LeaderboardViewModel.cs" />
     <Compile Include="View\Converter\Converters.cs" />
@@ -127,7 +128,6 @@
     <Content Include="ApplicationIcon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TextFile1.txt" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.$(TargetFrameworkProfile).Overrides.targets" />

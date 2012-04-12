@@ -49,9 +49,16 @@ namespace MathDash.View
             if (!AlreadyDisplayedSubmitHighScoreButton)
             {
                 AlreadyDisplayedSubmitHighScoreButton = true;
-                HttpWebRequest request = WebRequest.CreateHttp("http://mathdash.heroku.com/scores.json");
-                request.Method = "GET";
-                request.BeginGetResponse(new AsyncCallback(GetHighScoresResponseCallback), request);
+                try
+                {
+                    HttpWebRequest request = WebRequest.CreateHttp("http://mathdash.heroku.com/scores.json");
+                    request.Method = "GET";
+                    request.BeginGetResponse(new AsyncCallback(GetHighScoresResponseCallback), request);
+                }
+                catch (Exception)
+                {
+                    // Do nothing.
+                }
             }
         }
 
@@ -67,33 +74,40 @@ namespace MathDash.View
 
         private void GetHighScoresResponseCallback(IAsyncResult asyncResult)
         {
-            HttpWebRequest request = (HttpWebRequest)asyncResult.AsyncState;
-            HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asyncResult);
-
-            ObservableCollection<HighScore> highScores = new ObservableCollection<HighScore>();
-            using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+            try
             {
-                JArray ja = JArray.Parse(sr.ReadToEnd());
+                HttpWebRequest request = (HttpWebRequest)asyncResult.AsyncState;
+                HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asyncResult);
 
-                // Populate high scores list.
-                for (int i = 0; i < ja.Count; i++)
+                ObservableCollection<HighScore> highScores = new ObservableCollection<HighScore>();
+                using (StreamReader sr = new StreamReader(response.GetResponseStream()))
                 {
-                    JObject jo = (JObject)ja[i];
-                    HighScore hs = new HighScore(i + 1,
-                                                 (string)jo["player"],
-                                                 (int)jo["score"],
-                                                 DateTime.FromFileTimeUtc(long.Parse((string)jo["ts"])));
-                    highScores.Add(hs);
+                    JArray ja = JArray.Parse(sr.ReadToEnd());
+
+                    // Populate high scores list.
+                    for (int i = 0; i < ja.Count; i++)
+                    {
+                        JObject jo = (JObject)ja[i];
+                        HighScore hs = new HighScore(i + 1,
+                                                     (string)jo["player"],
+                                                     (int)jo["score"],
+                                                     DateTime.FromFileTimeUtc(long.Parse((string)jo["ts"])));
+                        highScores.Add(hs);
+                    }
+                }
+
+
+                if (highScores.Count < 20 || scoreViewModel.Score > highScores[highScores.Count - 1].Score)
+                {
+                    SubmitHighScoreButton.Dispatcher.BeginInvoke(() =>
+                    {
+                        SubmitHighScoreButton.Visibility = System.Windows.Visibility.Visible;
+                    });
                 }
             }
-
-
-            if (scoreViewModel.Score > highScores[highScores.Count - 1].Score || highScores.Count < 20)
+            catch (Exception)
             {
-                SubmitHighScoreButton.Dispatcher.BeginInvoke(() =>
-                {
-                    SubmitHighScoreButton.Visibility = System.Windows.Visibility.Visible;
-                });
+                // Do nothing
             }
         }
 
@@ -137,40 +151,51 @@ namespace MathDash.View
                 new JProperty("digest", digest));
 
             string json = JsonConvert.SerializeObject(ja);
+            try
+            {
+                HttpWebRequest request = HttpWebRequest.CreateHttp("http://mathdash.heroku.com/scores.json");
+                request.Method = "POST";
+                request.ContentType = "application/json";
 
-            HttpWebRequest request = HttpWebRequest.CreateHttp("http://mathdash.heroku.com/scores.json");
-            request.Method = "POST";
-            request.ContentType = "application/json";
+                Tuple<string, HttpWebRequest> tuple = new Tuple<string, HttpWebRequest>(json, request);
 
-            Tuple<string, HttpWebRequest> tuple = new Tuple<string, HttpWebRequest>(json, request);
-
-            request.BeginGetRequestStream(new AsyncCallback(PostScoreRequestCallback), tuple);
+                request.BeginGetRequestStream(new AsyncCallback(PostScoreRequestCallback), tuple);
+            }
+            catch (Exception)
+            {
+                // Do nothing lol.
+            }
 
         }
 
         private void PostScoreRequestCallback(IAsyncResult asyncResult)
         {
-            Tuple<string, HttpWebRequest> tuple = (Tuple<string, HttpWebRequest>)(asyncResult.AsyncState);
-
-            string json = (string)tuple.Item1;
-            HttpWebRequest request = (HttpWebRequest)tuple.Item2;
-            using (Stream postStream = request.EndGetRequestStream(asyncResult))
+            try
             {
-                byte[] bytes = Encoding.UTF8.GetBytes(json);
-                postStream.Write(bytes, 0, bytes.Length);
+                Tuple<string, HttpWebRequest> tuple = (Tuple<string, HttpWebRequest>)(asyncResult.AsyncState);
+
+                string json = (string)tuple.Item1;
+                HttpWebRequest request = (HttpWebRequest)tuple.Item2;
+                using (Stream postStream = request.EndGetRequestStream(asyncResult))
+                {
+                    byte[] bytes = Encoding.UTF8.GetBytes(json);
+                    postStream.Write(bytes, 0, bytes.Length);
+                }
+                request.BeginGetResponse(new AsyncCallback(PostScoreResponseCallback), request);
             }
-            request.BeginGetResponse(new AsyncCallback(PostScoreResponseCallback), request);
+            catch (Exception)
+            {
+                // Just fail silently.. sigh.
+            }
         }
 
         private void PostScoreResponseCallback(IAsyncResult asyncResult)
         {
-            HttpWebRequest request = (HttpWebRequest)asyncResult.AsyncState;
+            try {
+                HttpWebRequest request = (HttpWebRequest)asyncResult.AsyncState;
 
-            // End the operation
-            HttpWebResponse response;
-            try
-            {
-                response = (HttpWebResponse)request.EndGetResponse(asyncResult);
+                // End the operation
+                HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asyncResult);
                 if (response.StatusCode == HttpStatusCode.Created)
                 {
                     this.Dispatcher.BeginInvoke(() =>
@@ -179,7 +204,9 @@ namespace MathDash.View
                         });
                 }
             }
-            catch (Exception) { }
+            catch (Exception) {
+                // Do nothing -_-
+            }
         }
     }
 }
